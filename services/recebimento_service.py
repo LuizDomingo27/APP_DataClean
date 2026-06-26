@@ -70,10 +70,6 @@ def process_recebimento(df_raw: pd.DataFrame) -> dict[str, pd.DataFrame | list[s
         if num_col in df_out.columns:
             df_out[num_col] = pd.to_numeric(df_out[num_col], errors="coerce")
 
-    # Formata DIA como dd/mm/yyyy
-    if "DIA" in df_out.columns:
-        df_out["DIA"] = df_out["DIA"].dt.strftime("%d/%m/%Y")
-
     # ── POLO_RECEBIMENTO — filtra MP = Polo ───────────────────────────────────
     polo_cols = [c for c in ("DIA", "OFICINA", "MP", "REAL CORTADO", "MINUTOS") if c in df_out.columns]
     if "MP" in df_out.columns:

@@ -5,6 +5,7 @@ Service: exportação dos DataFrames para arquivos .xlsx com formatação profis
 from __future__ import annotations
 
 import io
+import datetime
 import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.styles import (
@@ -47,15 +48,26 @@ def _format_sheet(ws):
             cell.font      = Font(name="Calibri", size=10)
 
             # Formatos específicos por tipo
-            if isinstance(cell.value, float):
+            if isinstance(cell.value, bool):
+                pass
+            elif isinstance(cell.value, float):
                 cell.number_format = "#,##0.00"
             elif isinstance(cell.value, int):
                 cell.number_format = "#,##0"
+            elif isinstance(cell.value, (datetime.datetime, datetime.date)):
+                cell.number_format = "DD/MM/YYYY"
 
     # Largura automática
+    def _display_len(v) -> int:
+        if v is None:
+            return 0
+        if isinstance(v, (datetime.datetime, datetime.date)):
+            return 10  # comprimento de "DD/MM/YYYY"
+        return len(str(v))
+
     for col_cells in ws.columns:
         max_len = max(
-            (len(str(c.value)) if c.value is not None else 0 for c in col_cells),
+            (_display_len(c.value) for c in col_cells),
             default=10,
         )
         ws.column_dimensions[get_column_letter(col_cells[0].column)].width = min(

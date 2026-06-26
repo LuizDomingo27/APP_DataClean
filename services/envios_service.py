@@ -49,6 +49,7 @@ MALHA_MAP: dict[str, list[str]] = {
 
 FINAL_COLS   = ["ORDEM", "OFICINA", "QTD", "MINUTOS", "ENVIO", "MP", "PDV", "FRETE", "SITUAÇÃO"]
 NUMERIC_COLS = {"QTD", "MINUTOS"}
+DATE_COLS    = {"ENVIO"}
 
 
 # ─── Utilitários ──────────────────────────────────────────────────────────────
@@ -99,19 +100,17 @@ def _select_and_rename(
 
 
 def _format_date_col(series: pd.Series) -> pd.Series:
-    """Converte coluna de data para DD/MM/YYYY (pt-BR). Inválido/vazio → ''."""
-    parsed = pd.to_datetime(series, errors="coerce", dayfirst=True)
-    return parsed.apply(
-        lambda v: v.strftime("%d/%m/%Y") if not pd.isnull(v) else ""
-    )
+    """Converte coluna de data para datetime nativo. Inválido/vazio → NaT (célula em branco)."""
+    return pd.to_datetime(series, errors="coerce", dayfirst=True)
 
 
 def _fill_nulls(df: pd.DataFrame) -> pd.DataFrame:
     """
     Preenche e normaliza valores coluna por coluna:
       - Numéricas (QTD, MINUTOS) : NaN → 0  |  valor real → preserva
-      - PDV  : NaN, vazio, "0", "0.0"  → "NÃO_PDV"
-      - MP   : NaN, vazio, "0", "0.0"  → "Sem MP Informada"
+      - Datas (ENVIO)     : mantém datetime nativo; inválida/vazia → NaT (em branco)
+      - PDV        : NaN, vazio, "0", "0.0"  → "NÃO_PDV"
+      - MP         : NaN, vazio, "0", "0.0"  → "Sem MP Informada"
       - Demais texto : NaN/vazio → "Não informado"
     """
     VAZIOS = {"nan", "none", "nat", "", "0", "0.0"}
@@ -120,6 +119,9 @@ def _fill_nulls(df: pd.DataFrame) -> pd.DataFrame:
 
         if col in NUMERIC_COLS:
             df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
+
+        elif col in DATE_COLS:
+            df[col] = pd.to_datetime(df[col], errors="coerce")
 
         elif col == "PDV":
             df[col] = df[col].fillna("NÃO_PDV").astype(str).str.strip()
@@ -141,7 +143,12 @@ def _ensure_cols(df: pd.DataFrame, cols: list[str]) -> pd.DataFrame:
     """Garante que todas as colunas finais existam."""
     for col in cols:
         if col not in df.columns:
-            df[col] = 0 if col in NUMERIC_COLS else ""
+            if col in NUMERIC_COLS:
+                df[col] = 0
+            elif col in DATE_COLS:
+                df[col] = pd.NaT
+            else:
+                df[col] = ""
     return df[cols]
 
 
@@ -180,8 +187,12 @@ def merge_envios(df_jeans: pd.DataFrame, df_malha: pd.DataFrame) -> pd.DataFrame
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0)
 
+    for col in DATE_COLS:
+        if col in df.columns:
+            df[col] = pd.to_datetime(df[col], errors="coerce")
+
     for col in df.columns:
-        if col not in NUMERIC_COLS:
+        if col not in NUMERIC_COLS and col not in DATE_COLS:
             df[col] = df[col].fillna("").astype(str).str.strip()
 
     if "PDV" in df.columns:

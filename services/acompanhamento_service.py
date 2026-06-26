@@ -87,21 +87,28 @@ def _is_real_text(value) -> bool:
     return True
 
 
-def _fmt_recebimento(val) -> str:
-    """Formata célula mista de RECEBIMENTO: data → DD/MM/YYYY, texto → texto, vazio → ''."""
+def _fmt_recebimento(val):
+    """
+    Normaliza célula mista de RECEBIMENTO preservando o tipo nativo:
+      - data (Timestamp/datetime) ou string parseável como data → datetime nativo
+      - texto não-data (ex: "Coletando datas") → string original
+      - vazio/nulo → None (célula em branco no Excel)
+    A formatação visual DD/MM/YYYY é responsabilidade do export_service.py,
+    via number_format, sem que a coluna perca o tipo de data.
+    """
     if val is None or (isinstance(val, float) and pd.isna(val)):
-        return ""
-    if isinstance(val, (pd.Timestamp, datetime.datetime, datetime.date)):
-        if isinstance(val, pd.Timestamp) and pd.isnull(val):
-            return ""
-        return val.strftime("%d/%m/%Y")
+        return None
+    if isinstance(val, pd.Timestamp):
+        return None if pd.isnull(val) else val.to_pydatetime()
+    if isinstance(val, (datetime.datetime, datetime.date)):
+        return val
     s = str(val).strip()
     if s.lower() in ("", "nan", "nat", "none"):
-        return ""
+        return None
     try:
         r = pd.to_datetime(s, dayfirst=True, errors="coerce")
         if r is not pd.NaT and not pd.isnull(r):
-            return r.strftime("%d/%m/%Y")
+            return r.to_pydatetime()
     except Exception:
         pass
     return s
@@ -109,17 +116,16 @@ def _fmt_recebimento(val) -> str:
 
 def _format_dates_ptbr(df: pd.DataFrame, date_cols: list[str]) -> pd.DataFrame:
     """
-    Converte colunas de data para string no formato DD/MM/YYYY (pt-BR).
-    Aceita Timestamp, datetime ou string parseável.
-    Deixa NaT / vazios como string vazia.
+    Converte colunas de data para datetime nativo (pd.Timestamp).
+    Aceita Timestamp, datetime ou string parseável como entrada.
+    Mantém o tipo de data — a formatação visual DD/MM/YYYY é aplicada
+    na exportação (export_service.py), sem perder o tipo nativo.
+    Valores inválidos/vazios viram NaT (célula em branco no Excel).
     """
     for col in date_cols:
         if col not in df.columns:
             continue
-        parsed = pd.to_datetime(df[col], errors="coerce", dayfirst=True)
-        df[col] = parsed.apply(
-            lambda v: v.strftime("%d/%m/%Y") if not pd.isnull(v) else ""
-        )
+        df[col] = pd.to_datetime(df[col], errors="coerce", dayfirst=True)
     return df
 
 
