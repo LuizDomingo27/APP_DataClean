@@ -7,7 +7,6 @@ textColor             = "#0A1F1C"
 font                  = "sans-serif"
 
 [server]
-headless        = false
 runOnSave       = false
 maxUploadSize   = 50
 
