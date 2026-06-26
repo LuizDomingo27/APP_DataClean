@@ -87,6 +87,26 @@ def _is_real_text(value) -> bool:
     return True
 
 
+def _fmt_recebimento(val) -> str:
+    """Formata célula mista de RECEBIMENTO: data → DD/MM/YYYY, texto → texto, vazio → ''."""
+    if val is None or (isinstance(val, float) and pd.isna(val)):
+        return ""
+    if isinstance(val, (pd.Timestamp, datetime.datetime, datetime.date)):
+        if isinstance(val, pd.Timestamp) and pd.isnull(val):
+            return ""
+        return val.strftime("%d/%m/%Y")
+    s = str(val).strip()
+    if s.lower() in ("", "nan", "nat", "none"):
+        return ""
+    try:
+        r = pd.to_datetime(s, dayfirst=True, errors="coerce")
+        if r is not pd.NaT and not pd.isnull(r):
+            return r.strftime("%d/%m/%Y")
+    except Exception:
+        pass
+    return s
+
+
 def _format_dates_ptbr(df: pd.DataFrame, date_cols: list[str]) -> pd.DataFrame:
     """
     Converte colunas de data para string no formato DD/MM/YYYY (pt-BR).
@@ -145,11 +165,11 @@ def process_acompanhamento(df_raw: pd.DataFrame) -> dict[str, pd.DataFrame | lis
         mask_status = pd.Series(False, index=df.index)
         warnings.append("Coluna RECEBIMENTO não encontrada; STATUS.xlsx ficará vazio.")
 
-    if prev_col and prev_col in df.columns:
-        mask_previsao = df[prev_col].apply(_is_real_date)
+    if rec_col and rec_col in df.columns:
+        mask_previsao = df[rec_col].apply(_is_real_date)
     else:
         mask_previsao = pd.Series(False, index=df.index)
-        warnings.append("Coluna PREVISÃO RECEBIMENTO não encontrada; PREVISAO.xlsx ficará vazio.")
+        warnings.append("Coluna RECEBIMENTO não encontrada; PREVISAO.xlsx ficará vazio.")
 
     # ── 3. Helper de seleção + renomeio ───────────────────────────────────────
     def _select(fields: list[str], source: pd.DataFrame) -> pd.DataFrame:
@@ -163,7 +183,7 @@ def process_acompanhamento(df_raw: pd.DataFrame) -> dict[str, pd.DataFrame | lis
         )
         return sub
 
-    DATE_COLS = ["ENVIO", "DEAD LINE", "PREVISÃO RECEBIMENTO"]
+    DATE_COLS = ["ENVIO", "DEAD LINE", "RECEBIMENTO"]
 
     # ── 4. ACOMPANHAMENTO ─────────────────────────────────────────────────────
     df_acomp = _select(
@@ -178,7 +198,8 @@ def process_acompanhamento(df_raw: pd.DataFrame) -> dict[str, pd.DataFrame | lis
          "DEAD LINE", "SITUAÇÃO", "MP", "RECEBIMENTO"],
         df.loc[mask_status],
     )
-    _format_dates_ptbr(df_status, [c for c in DATE_COLS if c in df_status.columns])
+    # RECEBIMENTO no STATUS é texto puro — não passa pelo formatador de datas
+    _format_dates_ptbr(df_status, [c for c in DATE_COLS if c in df_status.columns and c != "RECEBIMENTO"])
     # RECEBIMENTO já é string; garante limpeza
     if "RECEBIMENTO" in df_status.columns:
         df_status["RECEBIMENTO"] = df_status["RECEBIMENTO"].astype(str).str.strip()
@@ -186,14 +207,35 @@ def process_acompanhamento(df_raw: pd.DataFrame) -> dict[str, pd.DataFrame | lis
     # ── 6. PREVISAO — PREVISÃO RECEBIMENTO é data válida ─────────────────────
     df_prev = _select(
         ["ORDEM MESTRE", "OFICINA", "ENVIO", "QTD", "MINUTOS",
-         "DEAD LINE", "SITUAÇÃO", "MP", "PREVISÃO RECEBIMENTO"],
+         "DEAD LINE", "SITUAÇÃO", "MP", "RECEBIMENTO"],
         df.loc[mask_previsao],
     )
     _format_dates_ptbr(df_prev, [c for c in DATE_COLS if c in df_prev.columns])
+
+    # ── 7. POLO COSTURA — SITUAÇÃO = Costura AND MP = Polo ────────────────────
+    mp_col = col_map.get("MP")
+    if mp_col and mp_col in df.columns:
+        mask_polo = df[mp_col].fillna("").astype(str).str.strip().str.lower() == "polo"
+    else:
+        mask_polo = pd.Series(False, index=df.index)
+        warnings.append("Coluna MP não encontrada; POLO_COSTURA ficará vazio.")
+
+    df_polo = _select(
+        ["RECEBIMENTO", "ENVIO", "DEAD LINE", "MP", "OFICINA", "SITUAÇÃO", "QTD", "MINUTOS"],
+        df.loc[mask_polo],
+    )
+    _format_dates_ptbr(df_polo, [c for c in ["ENVIO", "DEAD LINE"] if c in df_polo.columns])
+
+    # RECEBIMENTO é misto (data OU texto) — preserva texto, formata datas
+    if "RECEBIMENTO" in df_polo.columns:
+        df_polo["RECEBIMENTO"] = df_polo["RECEBIMENTO"].apply(_fmt_recebimento)
+
+    df_polo.rename(columns={"MINUTOS": "MIN"}, inplace=True)
 
     return {
         "acompanhamento": df_acomp,
         "status":         df_status,
         "previsao":       df_prev,
+        "polo_costura":   df_polo,
         "warnings":       warnings,
     }

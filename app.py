@@ -10,13 +10,12 @@ import io, zipfile
 import streamlit as st
 import pandas as pd
 
-from core.config   import OUTPUT_DIR
 from core.utils    import read_file
 from services.acompanhamento_service import process_acompanhamento
 from services.recebimento_service    import process_recebimento
 from services.estoque_service        import process_estoque
 from services.envios_service         import process_envios_jeans, process_envios_malha, merge_envios
-from services.export_service         import df_to_excel_bytes, save_all
+from services.export_service         import df_to_excel_bytes
 from ui.styles     import STYLES
 from ui.components import preview_table, download_button_card
 
@@ -179,10 +178,12 @@ if run_btn and all_core:
             results["ACOMPANHAMENTO"] = r1["acompanhamento"]
             results["STATUS"]         = r1["status"]
             results["PREVISAO"]       = r1["previsao"]
+            results["POLO_COSTURA"]   = r1["polo_costura"]
             all_warnings.extend(r1["warnings"])
 
             r2 = process_recebimento(read_file(file_receb))
-            results["RECEBIMENTO"] = r2["recebimento"]
+            results["RECEBIMENTO"]      = r2["recebimento"]
+            results["POLO_RECEBIMENTO"] = r2["polo_recebimento"]
             all_warnings.extend(r2["warnings"])
 
             r3 = process_estoque(read_file(file_estoque))
@@ -203,7 +204,6 @@ if run_btn and all_core:
                 results["ENVIOS_OFICINAS"] = r5["envios_malha"]
                 all_warnings.extend(r5["warnings"])
 
-            save_all(results, OUTPUT_DIR)
             st.session_state["results"]      = results
             st.session_state["all_warnings"] = all_warnings
 
@@ -228,12 +228,14 @@ if results:
                 unsafe_allow_html=True)
 
     METRIC_META = {
-        "ACOMPANHAMENTO":  "📋 Acompanhamento",
-        "STATUS":          "🔴 Status",
-        "PREVISAO":        "📅 Previsão",
-        "RECEBIMENTO":     "📦 Recebimento",
-        "ESTOQUE":         "🏭 Estoque",
-        "ENVIOS_OFICINAS": "🚚 Envios Oficinas",
+        "ACOMPANHAMENTO":   "📋 Acompanhamento",
+        "STATUS":           "🔴 Status",
+        "PREVISAO":         "📅 Previsão",
+        "RECEBIMENTO":      "📦 Recebimento",
+        "ESTOQUE":          "🏭 Estoque",
+        "ENVIOS_OFICINAS":  "🚚 Envios Oficinas",
+        "POLO_COSTURA":     "🎯 Polo · Costura",
+        "POLO_RECEBIMENTO": "📦 Polo · Recebimento",
     }
     mc = st.columns(len(results), gap="small")
     for idx, (key, df_r) in enumerate(results.items()):
@@ -253,6 +255,7 @@ if results:
         "ESTOQUE":         "🏭 Estoque",
         "ENVIOS_OFICINAS": "🚚 Envios Oficinas",
     }
+    # POLO_COSTURA é exibido em seção própria, não nas tabs genéricas
     tab_keys   = [k for k in TAB_META if k in results]
     tab_labels = [TAB_META[k] for k in tab_keys]
     tabs = st.tabs(tab_labels)
@@ -273,6 +276,58 @@ if results:
                     data=df_to_excel_bytes(df_tab, sheet_name=key[:31]),
                     file_name=f"{key}.xlsx",
                 )
+
+    # ── Polo · Costura — seção dedicada ──────────────────────────────────────
+    df_polo = results.get("POLO_COSTURA")
+    if df_polo is not None and not df_polo.empty:
+        st.markdown("<hr>", unsafe_allow_html=True)
+        st.markdown(
+            '<p class="section-label" style="margin-top:0.5rem">'
+            '🎯 Polo · Costura</p>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            '<p style="font-family:\'DM Mono\',monospace;font-size:0.7rem;'
+            'color:#3D566E;letter-spacing:0.05em;margin-bottom:0.75rem">'
+            '// situação = costura  ·  MP = Polo</p>',
+            unsafe_allow_html=True,
+        )
+        cp_polo, cd_polo = st.columns([3, 1], gap="medium")
+        with cp_polo:
+            preview_table(df_polo, "POLO_COSTURA")
+        with cd_polo:
+            st.markdown("<div style='height:1.5rem'></div>", unsafe_allow_html=True)
+            download_button_card(
+                label="POLO_COSTURA.xlsx",
+                data=df_to_excel_bytes(df_polo, sheet_name="POLO_COSTURA"),
+                file_name="POLO_COSTURA.xlsx",
+            )
+
+    # ── Polo · Recebimento — seção dedicada ──────────────────────────────────
+    df_polo_receb = results.get("POLO_RECEBIMENTO")
+    if df_polo_receb is not None and not df_polo_receb.empty:
+        st.markdown("<hr>", unsafe_allow_html=True)
+        st.markdown(
+            '<p class="section-label" style="margin-top:0.5rem">'
+            '📦 Polo · Recebimento</p>',
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            '<p style="font-family:\'DM Mono\',monospace;font-size:0.7rem;'
+            'color:#3D566E;letter-spacing:0.05em;margin-bottom:0.75rem">'
+            '// origem: recebimento  ·  MP = Polo</p>',
+            unsafe_allow_html=True,
+        )
+        cp_pr, cd_pr = st.columns([3, 1], gap="medium")
+        with cp_pr:
+            preview_table(df_polo_receb, "POLO_RECEBIMENTO")
+        with cd_pr:
+            st.markdown("<div style='height:1.5rem'></div>", unsafe_allow_html=True)
+            download_button_card(
+                label="POLO_RECEBIMENTO.xlsx",
+                data=df_to_excel_bytes(df_polo_receb, sheet_name="POLO_RECEBIMENTO"),
+                file_name="POLO_RECEBIMENTO.xlsx",
+            )
 
     st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown('<p class="section-label">download em lote</p>', unsafe_allow_html=True)

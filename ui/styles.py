@@ -1,115 +1,94 @@
 """
-Tema visual — Dark Neon Terminal
-Minimalista com acentos neon: ciano #00FFC2, roxo #9B5CFF, verde-água #00D4AA
+Tema visual — Light Aqua Modern
+Fundo branco · acentos verde neon-água · bordas suaves
 Tipografia: Syne (display) + DM Mono (code/labels)
 """
 
 STYLES = """
 <style>
-/* ── Fontes ───────────────────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap');
-
 /* ── Tokens ───────────────────────────────────────────────────────────────── */
 :root {
-    --void:       #060A0F;
-    --surface:    #0B1017;
-    --panel:      #0F1923;
-    --rim:        #131F2D;
-    --wire:       #1A2A3A;
-    --wire-hi:    #243548;
+    --bg:         #F0F7F5;
+    --surface:    #FFFFFF;
+    --panel:      #E8F4F1;
+    --rim:        #D0E8E3;
+    --wire:       #B8D8D2;
+    --wire-hi:    #8ECAC2;
 
-    --cyan:       #00FFC2;
-    --cyan-dim:   rgba(0,255,194,0.08);
-    --cyan-glow:  rgba(0,255,194,0.18);
-    --cyan-mid:   rgba(0,255,194,0.45);
+    --aqua:       #00C4A0;
+    --aqua-dim:   rgba(0,196,160,0.07);
+    --aqua-glow:  rgba(0,196,160,0.20);
+    --aqua-mid:   rgba(0,196,160,0.35);
+    --aqua-deep:  #00967A;
+    --aqua-neon:  #00E5C3;
 
-    --violet:     #9B5CFF;
-    --violet-dim: rgba(155,92,255,0.08);
-    --violet-glow:rgba(155,92,255,0.18);
+    --teal:       #00B894;
+    --teal-dim:   rgba(0,184,148,0.09);
 
-    --teal:       #00D4AA;
-    --teal-dim:   rgba(0,212,170,0.08);
-
-    --mint:       #A8FFE8;
-    --ghost:      rgba(168,255,232,0.55);
-    --muted:      #3D566E;
-    --faded:      #1E3347;
-
-    --text-hi:    #E8F4F0;
-    --text-mid:   #8BAAB8;
-    --text-lo:    #3D566E;
+    --text-hi:    #0A1F1C;
+    --text-mid:   #2E6B61;
+    --text-lo:    #7AADA6;
+    --muted:      #5E9990;
+    --faded:      #D4EDE9;
 
     --r-sm: 4px;
-    --r-md: 8px;
-    --r-lg: 12px;
+    --r-md: 10px;
+    --r-lg: 16px;
 
     --ease: cubic-bezier(0.16, 1, 0.3, 1);
     --t:    180ms;
+
+    --shadow-sm: 0 1px 3px rgba(0,80,60,0.06), 0 2px 8px rgba(0,80,60,0.04);
+    --shadow-md: 0 2px 12px rgba(0,80,60,0.08), 0 4px 20px rgba(0,80,60,0.05);
+    --shadow-lg: 0 4px 24px rgba(0,80,60,0.10), 0 8px 40px rgba(0,80,60,0.07);
 }
 
 /* ── Reset ────────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
 html, body, [class*="css"] {
-    font-family: 'DM Mono', monospace !important;
-    background: var(--void) !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    background: var(--bg) !important;
     color: var(--text-hi) !important;
     -webkit-font-smoothing: antialiased;
 }
 
 .stApp {
-    background: var(--void) !important;
+    background: var(--bg) !important;
     min-height: 100vh;
 }
 
-/* Ruído sutil de fundo */
-.stApp::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.4;
-}
-
-/* Acento luminoso no topo */
+/* Faixa neon topo */
 .stApp::after {
     content: '';
     position: fixed;
-    top: 0; left: 10%; right: 10%;
-    height: 1px;
+    top: 0; left: 0; right: 0;
+    height: 3px;
     background: linear-gradient(90deg,
-        transparent,
-        var(--cyan-mid) 30%,
-        var(--violet) 70%,
-        transparent
+        var(--aqua-neon) 0%,
+        var(--aqua)      50%,
+        var(--teal)      100%
     );
-    opacity: 0.5;
+    z-index: 9999;
     pointer-events: none;
-    z-index: 1;
 }
-
-
 
 /* ── Layout ───────────────────────────────────────────────────────────────── */
 .main .block-container {
     padding: 2.5rem 3rem 5rem !important;
     max-width: 1200px !important;
     position: relative;
-    z-index: 2;
 }
 
 /* ── Header ───────────────────────────────────────────────────────────────── */
 .app-header {
     padding: 3rem 0 2rem;
     text-align: center;
-    position: relative;
     margin-bottom: 3rem;
 }
 
 .app-header h1 {
-    font-family: 'Syne', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 2.25rem;
     font-weight: 800;
     letter-spacing: -0.04em;
@@ -118,27 +97,27 @@ html, body, [class*="css"] {
     line-height: 1.1;
 }
 
-.neon-cyan  { color: var(--cyan);   }
-.neon-violet{ color: var(--violet); }
+.neon-cyan   { color: var(--aqua);      }
+.neon-violet { color: var(--aqua-deep); }
 
 .app-header p {
-    font-family: 'DM Mono', monospace;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 0.75rem;
     color: var(--muted);
     letter-spacing: 0.05em;
     margin: 0;
 }
 
-/* Linha divisória com glow */
+/* Linha divisória com glow suave */
 .header-rule {
     margin: 2rem auto 0;
     width: 100%;
     height: 1px;
     background: linear-gradient(90deg,
         transparent 0%,
-        var(--wire-hi) 20%,
-        var(--cyan-mid) 50%,
-        var(--wire-hi) 80%,
+        var(--wire) 20%,
+        var(--aqua-mid) 50%,
+        var(--wire) 80%,
         transparent 100%
     );
     position: relative;
@@ -149,14 +128,14 @@ html, body, [class*="css"] {
     position: absolute;
     top: -2px; left: 30%; right: 30%;
     height: 5px;
-    background: var(--cyan);
+    background: var(--aqua);
     filter: blur(6px);
-    opacity: 0.4;
+    opacity: 0.25;
 }
 
 /* ── Label de seção ───────────────────────────────────────────────────────── */
 .section-label {
-    font-family: 'DM Mono', monospace;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 0.65rem;
     font-weight: 500;
     letter-spacing: 0.18em;
@@ -170,8 +149,8 @@ html, body, [class*="css"] {
 
 .section-label::before {
     content: '//';
-    color: var(--cyan);
-    opacity: 0.7;
+    color: var(--aqua);
+    opacity: 0.9;
     font-size: 0.7rem;
 }
 
@@ -185,52 +164,47 @@ html, body, [class*="css"] {
 /* ── Cards de upload ──────────────────────────────────────────────────────── */
 .upload-card {
     background: var(--surface);
-    border: 1px solid var(--wire);
+    border: 1px solid var(--rim);
     border-radius: var(--r-lg);
     padding: 1.1rem 1.2rem 0.7rem;
     margin-bottom: 0.5rem;
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
     transition:
         border-color var(--t) var(--ease),
-        background  var(--t) var(--ease),
-        box-shadow  var(--t) var(--ease),
-        transform   var(--t) var(--ease);
+        box-shadow   var(--t) var(--ease),
+        transform    var(--t) var(--ease);
 }
 
-/* Corner accent — canto superior esquerdo */
+/* Linha neon no topo do card no hover */
 .upload-card::before {
     content: '';
     position: absolute;
+    top: 0; left: 15%; right: 15%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--aqua), transparent);
+    border-radius: 0 0 4px 4px;
+    opacity: 0;
+    transition: opacity var(--t) var(--ease);
+}
+
+/* Canto decorativo */
+.upload-card::after {
+    content: '';
+    position: absolute;
     top: 0; left: 0;
-    width: 28px; height: 28px;
-    border-top: 2px solid var(--cyan);
-    border-left: 2px solid var(--cyan);
+    width: 24px; height: 24px;
+    border-top: 2px solid var(--aqua);
+    border-left: 2px solid var(--aqua);
     border-radius: var(--r-lg) 0 0 0;
     opacity: 0;
     transition: opacity var(--t) var(--ease);
 }
 
-/* Ponto de glow no canto */
-.upload-card::after {
-    content: '';
-    position: absolute;
-    top: -1px; left: -1px;
-    width: 6px; height: 6px;
-    background: var(--cyan);
-    border-radius: 0 0 4px 0;
-    opacity: 0;
-    box-shadow: 0 0 12px 4px var(--cyan-glow);
-    transition: opacity var(--t) var(--ease);
-}
-
 .upload-card:hover {
-    border-color: var(--wire-hi);
-    background: var(--panel);
-    box-shadow:
-        0 0 0 1px var(--wire-hi),
-        0 8px 32px rgba(0,0,0,0.5),
-        inset 0 1px 0 rgba(255,255,255,0.02);
+    border-color: var(--aqua-mid);
+    box-shadow: var(--shadow-md), 0 0 0 3px var(--aqua-dim);
     transform: translateY(-2px);
 }
 
@@ -239,27 +213,19 @@ html, body, [class*="css"] {
     opacity: 1;
 }
 
-/* Variante roxo (Envios) */
+/* Variante Envios */
 .upload-card--violet {
     border-color: var(--faded);
     background: var(--surface);
 }
 
-.upload-card--violet::before {
-    border-color: var(--violet);
-}
-
 .upload-card--violet::after {
-    background: var(--violet);
-    box-shadow: 0 0 12px 4px var(--violet-glow);
+    border-color: var(--teal);
 }
 
 .upload-card--violet:hover {
-    border-color: rgba(155,92,255,0.3);
-    box-shadow:
-        0 0 0 1px rgba(155,92,255,0.2),
-        0 8px 32px rgba(0,0,0,0.5),
-        0 0 40px rgba(155,92,255,0.06);
+    border-color: rgba(0,184,148,0.4);
+    box-shadow: var(--shadow-md), 0 0 0 3px var(--teal-dim);
 }
 
 .card-header {
@@ -269,10 +235,10 @@ html, body, [class*="css"] {
     margin-bottom: 0.25rem;
 }
 
-.card-icon { font-size: 1rem; line-height: 1; }
+.card-icon  { font-size: 1rem; line-height: 1; }
 
 .card-title {
-    font-family: 'Syne', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 0.875rem;
     font-weight: 600;
     color: var(--text-hi);
@@ -280,7 +246,7 @@ html, body, [class*="css"] {
 }
 
 .card-desc {
-    font-family: 'DM Mono', monospace;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 0.7rem;
     color: var(--muted);
     margin: 0 0 0.5rem;
@@ -292,7 +258,7 @@ html, body, [class*="css"] {
 .file-chip {
     border-radius: var(--r-md);
     padding: 0.55rem 0.7rem;
-    font-family: 'DM Mono', monospace;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 0.72rem;
     font-weight: 400;
     text-align: center;
@@ -302,89 +268,81 @@ html, body, [class*="css"] {
 }
 
 .file-chip--ok {
-    background: rgba(0,212,170,0.06);
-    border-color: rgba(0,212,170,0.25);
-    color: var(--teal);
+    background: var(--teal-dim);
+    border-color: rgba(0,184,148,0.3);
+    color: var(--aqua-deep);
 }
 
 .file-chip--wait {
-    background: transparent;
-    border-color: var(--wire);
+    background: var(--panel);
+    border-color: var(--rim);
     color: var(--text-lo);
 }
 
-/* ── Botões ───────────────────────────────────────────────────────────────── */
+/* ── Botão principal ──────────────────────────────────────────────────────── */
 .stButton > button {
-    background: transparent !important;
-    color: var(--cyan) !important;
-    border: 1px solid var(--cyan-mid) !important;
+    background: var(--surface) !important;
+    color: var(--aqua-deep) !important;
+    border: 1.5px solid var(--aqua-mid) !important;
     border-radius: var(--r-md) !important;
-    font-family: 'DM Mono', monospace !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
     font-size: 0.8rem !important;
     font-weight: 500 !important;
     letter-spacing: 0.06em !important;
     padding: 0.6rem 1.5rem !important;
+    box-shadow: var(--shadow-sm) !important;
     transition: all var(--t) var(--ease) !important;
-    position: relative !important;
-    overflow: hidden !important;
-}
-
-.stButton > button::before {
-    content: '' !important;
-    position: absolute !important;
-    inset: 0 !important;
-    background: var(--cyan-dim) !important;
-    opacity: 0 !important;
-    transition: opacity var(--t) var(--ease) !important;
 }
 
 .stButton > button:hover {
-    background: var(--cyan-dim) !important;
-    border-color: var(--cyan) !important;
-    box-shadow: 0 0 24px var(--cyan-glow), inset 0 0 24px rgba(0,255,194,0.04) !important;
-    color: var(--cyan) !important;
+    background: var(--aqua) !important;
+    border-color: var(--aqua) !important;
+    color: #FFFFFF !important;
+    box-shadow: var(--shadow-md), 0 0 22px var(--aqua-glow) !important;
     transform: translateY(-1px) !important;
 }
 
 .stButton > button:active {
     transform: translateY(0) !important;
-    box-shadow: 0 0 8px var(--cyan-glow) !important;
+    box-shadow: var(--shadow-sm) !important;
 }
 
 .stButton > button:disabled {
-    background: transparent !important;
-    color: var(--wire-hi) !important;
-    border-color: var(--wire) !important;
+    background: var(--panel) !important;
+    color: var(--text-lo) !important;
+    border-color: var(--rim) !important;
     box-shadow: none !important;
     transform: none !important;
 }
 
-/* Download button */
+/* Botão de download */
 .stDownloadButton > button {
-    background: transparent !important;
-    color: var(--teal) !important;
-    border: 1px solid rgba(0,212,170,0.3) !important;
+    background: var(--surface) !important;
+    color: var(--aqua-deep) !important;
+    border: 1.5px solid var(--wire) !important;
     border-radius: var(--r-md) !important;
-    font-family: 'DM Mono', monospace !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
     font-size: 0.75rem !important;
     font-weight: 500 !important;
     letter-spacing: 0.04em !important;
+    box-shadow: var(--shadow-sm) !important;
     transition: all var(--t) var(--ease) !important;
 }
 
 .stDownloadButton > button:hover {
     background: var(--teal-dim) !important;
     border-color: var(--teal) !important;
-    box-shadow: 0 0 20px rgba(0,212,170,0.15) !important;
+    box-shadow: var(--shadow-md), 0 0 16px var(--aqua-glow) !important;
     transform: translateY(-1px) !important;
 }
 
 /* ── Métricas ─────────────────────────────────────────────────────────────── */
 [data-testid="stMetric"] {
     background: var(--surface) !important;
-    border: 1px solid var(--wire) !important;
+    border: 1px solid var(--rim) !important;
     border-radius: var(--r-lg) !important;
     padding: 1.1rem 1.25rem !important;
+    box-shadow: var(--shadow-sm) !important;
     transition: all var(--t) var(--ease) !important;
     position: relative !important;
     overflow: hidden !important;
@@ -394,30 +352,30 @@ html, body, [class*="css"] {
     content: '' !important;
     position: absolute !important;
     bottom: 0; left: 0; right: 0;
-    height: 1px !important;
-    background: linear-gradient(90deg, var(--cyan), var(--violet)) !important;
+    height: 2px !important;
+    background: linear-gradient(90deg, var(--aqua-neon), var(--teal)) !important;
     opacity: 0 !important;
     transition: opacity var(--t) var(--ease) !important;
 }
 
 [data-testid="stMetric"]:hover {
-    border-color: var(--wire-hi) !important;
-    background: var(--panel) !important;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.4) !important;
+    border-color: var(--aqua-mid) !important;
+    box-shadow: var(--shadow-md) !important;
+    transform: translateY(-1px) !important;
 }
 
 [data-testid="stMetric"]:hover::after { opacity: 1 !important; }
 
 [data-testid="stMetricValue"] {
-    font-family: 'Syne', sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
     font-size: 1.75rem !important;
     font-weight: 700 !important;
     letter-spacing: -0.03em !important;
-    color: var(--cyan) !important;
+    color: var(--aqua-deep) !important;
 }
 
 [data-testid="stMetricLabel"] {
-    font-family: 'DM Mono', monospace !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
     font-size: 0.65rem !important;
     letter-spacing: 0.1em !important;
     text-transform: uppercase !important;
@@ -425,7 +383,7 @@ html, body, [class*="css"] {
 }
 
 [data-testid="stMetricDelta"] {
-    font-family: 'DM Mono', monospace !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
     font-size: 0.7rem !important;
     color: var(--text-lo) !important;
 }
@@ -441,9 +399,9 @@ html, body, [class*="css"] {
 .stTabs [data-baseweb="tab"] {
     background: transparent !important;
     border: none !important;
-    border-bottom: 1px solid transparent !important;
+    border-bottom: 2px solid transparent !important;
     color: var(--muted) !important;
-    font-family: 'DM Mono', monospace !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
     font-size: 0.72rem !important;
     letter-spacing: 0.05em !important;
     padding: 0.6rem 1rem !important;
@@ -454,13 +412,14 @@ html, body, [class*="css"] {
 
 .stTabs [data-baseweb="tab"]:hover {
     color: var(--text-mid) !important;
-    background: rgba(0,255,194,0.02) !important;
+    background: var(--aqua-dim) !important;
 }
 
 .stTabs [aria-selected="true"] {
-    color: var(--cyan) !important;
-    border-bottom-color: var(--cyan) !important;
+    color: var(--aqua-deep) !important;
+    border-bottom-color: var(--aqua) !important;
     background: transparent !important;
+    font-weight: 500 !important;
 }
 
 .stTabs [data-baseweb="tab-panel"] {
@@ -469,20 +428,22 @@ html, body, [class*="css"] {
 
 /* ── DataFrames ───────────────────────────────────────────────────────────── */
 .stDataFrame {
-    border: 1px solid var(--wire) !important;
+    border: 1px solid var(--rim) !important;
     border-radius: var(--r-lg) !important;
     overflow: hidden !important;
+    box-shadow: var(--shadow-sm) !important;
 }
 
 /* ── Expander ─────────────────────────────────────────────────────────────── */
 .streamlit-expanderHeader {
     background: var(--surface) !important;
-    border: 1px solid var(--wire) !important;
+    border: 1px solid var(--rim) !important;
     border-radius: var(--r-md) !important;
     color: var(--text-mid) !important;
-    font-family: 'DM Mono', monospace !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
     font-size: 0.75rem !important;
     letter-spacing: 0.04em !important;
+    box-shadow: var(--shadow-sm) !important;
     transition: all var(--t) var(--ease) !important;
 }
 
@@ -494,7 +455,7 @@ html, body, [class*="css"] {
 
 .streamlit-expanderContent {
     background: var(--surface) !important;
-    border: 1px solid var(--wire) !important;
+    border: 1px solid var(--rim) !important;
     border-top: none !important;
     border-radius: 0 0 var(--r-md) var(--r-md) !important;
     padding: 1rem !important;
@@ -502,7 +463,7 @@ html, body, [class*="css"] {
 
 /* ── Preview title ────────────────────────────────────────────────────────── */
 .preview-title {
-    font-family: 'DM Mono', monospace;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 0.72rem;
     color: var(--muted);
     letter-spacing: 0.08em;
@@ -516,10 +477,10 @@ html, body, [class*="css"] {
 .row-badge {
     display: inline-flex;
     align-items: center;
-    background: var(--cyan-dim);
-    color: var(--cyan);
-    border: 1px solid rgba(0,255,194,0.2);
-    font-family: 'DM Mono', monospace;
+    background: var(--teal-dim);
+    color: var(--aqua-deep);
+    border: 1px solid rgba(0,184,148,0.25);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 0.65rem;
     padding: 1px 8px;
     border-radius: 999px;
@@ -529,30 +490,30 @@ html, body, [class*="css"] {
 /* ── File uploader ────────────────────────────────────────────────────────── */
 [data-testid="stFileUploader"] {
     background: var(--surface) !important;
-    border: 1px dashed var(--wire-hi) !important;
+    border: 1.5px dashed var(--wire) !important;
     border-radius: var(--r-md) !important;
     transition: all var(--t) var(--ease) !important;
 }
 
 [data-testid="stFileUploader"]:hover {
-    border-color: var(--cyan-mid) !important;
-    background: var(--cyan-dim) !important;
+    border-color: var(--aqua-mid) !important;
+    background: var(--aqua-dim) !important;
 }
 
 [data-testid="stFileUploaderDropzoneInstructions"] {
     color: var(--muted) !important;
-    font-family: 'DM Mono', monospace !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
     font-size: 0.72rem !important;
 }
 
 /* ── Scrollbar ────────────────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--panel); border-radius: 999px; }
 ::-webkit-scrollbar-thumb {
     background: var(--wire-hi);
     border-radius: 999px;
 }
-::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+::-webkit-scrollbar-thumb:hover { background: var(--aqua-mid); }
 
 /* ── HR ───────────────────────────────────────────────────────────────────── */
 hr {
@@ -564,15 +525,15 @@ hr {
 /* ── Alertas ──────────────────────────────────────────────────────────────── */
 .stAlert {
     border-radius: var(--r-md) !important;
-    font-family: 'DM Mono', monospace !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
     font-size: 0.75rem !important;
-    border-left-color: var(--cyan) !important;
+    border-left-color: var(--aqua) !important;
 }
 
 /* ── Animações de entrada ─────────────────────────────────────────────────── */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0);    }
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0);   }
 }
 
 .upload-card {
@@ -580,26 +541,26 @@ hr {
 }
 
 /* ── Spinner ──────────────────────────────────────────────────────────────── */
-.stSpinner > div { border-top-color: var(--cyan) !important; }
+.stSpinner > div { border-top-color: var(--aqua) !important; }
 
 /* ── Merge info box ───────────────────────────────────────────────────────── */
 .merge-box {
     width: 100%;
-    background: transparent;
-    border: 1px dashed rgba(0,255,194,0.12);
+    background: var(--panel);
+    border: 1.5px dashed var(--wire);
     border-radius: var(--r-lg);
     padding: 1rem;
     text-align: center;
 }
 
 .merge-box p {
-    font-family: 'DM Mono', monospace;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 0.7rem;
     color: var(--muted);
     margin: 0;
     line-height: 1.8;
 }
 
-.merge-box .accent { color: var(--cyan); font-weight: 500; }
+.merge-box .accent { color: var(--aqua-deep); font-weight: 500; }
 </style>
 """

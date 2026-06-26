@@ -62,10 +62,26 @@ def process_recebimento(df_raw: pd.DataFrame) -> dict[str, pd.DataFrame | list[s
     # Tenta parsear data na coluna DIA
     if "DIA" in df_out.columns:
         df_out["DIA"] = pd.to_datetime(df_out["DIA"], errors="coerce", dayfirst=True)
+        ano_atual = pd.Timestamp.now().year
+        df_out = df_out[df_out["DIA"].dt.year == ano_atual].reset_index(drop=True)
 
     # Garante tipo numérico em QTD e MINUTOS
     for num_col in ("REAL CORTADO", "MINUTOS"):
         if num_col in df_out.columns:
             df_out[num_col] = pd.to_numeric(df_out[num_col], errors="coerce")
 
-    return {"recebimento": df_out, "warnings": warnings}
+    # Formata DIA como dd/mm/yyyy
+    if "DIA" in df_out.columns:
+        df_out["DIA"] = df_out["DIA"].dt.strftime("%d/%m/%Y")
+
+    # ── POLO_RECEBIMENTO — filtra MP = Polo ───────────────────────────────────
+    polo_cols = [c for c in ("DIA", "OFICINA", "MP", "REAL CORTADO", "MINUTOS") if c in df_out.columns]
+    if "MP" in df_out.columns:
+        mask_polo = df_out["MP"].fillna("").astype(str).str.strip().str.lower() == "polo"
+        df_polo = df_out.loc[mask_polo, polo_cols].copy().reset_index(drop=True)
+        df_polo.rename(columns={"MINUTOS": "MIN"}, inplace=True)
+    else:
+        warnings.append("Coluna MP não encontrada; POLO_RECEBIMENTO ficará vazio.")
+        df_polo = pd.DataFrame()
+
+    return {"recebimento": df_out, "polo_recebimento": df_polo, "warnings": warnings}
